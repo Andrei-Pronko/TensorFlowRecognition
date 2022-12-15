@@ -1,15 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id "androidx.navigation.safeargs"
+    id 'com.google.gms.google-services'
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.example.tensorflowrecognition"
         minSdk 28
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -29,6 +31,9 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
@@ -40,6 +45,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+    implementation 'com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.5.6'
 
     // Navigation library
     def nav_version = "2.5.3"
@@ -61,6 +67,10 @@ dependencies {
 
     // WindowManager
     implementation 'androidx.window:window:1.1.0-alpha04'
+
+    implementation platform('com.google.firebase:firebase-bom:31.1.1')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-ml-modeldownloader-ktx:24.1.1'
 
     implementation 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
     implementation 'com.google.android.gms:play-services-tflite-gpu:16.1.0'

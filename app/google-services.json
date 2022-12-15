@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "156931219287",
+    "project_id": "tensorflowreognition",
+    "storage_bucket": "tensorflowreognition.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156931219287:android:40c9385ac90585d9ff2812",
+        "android_client_info": {
+          "package_name": "com.example.tensorflowrecognition"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "156931219287-rtuhv9afq2f6fgjl7lgr3q4mo4ef37oc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tensorflowrecognition",
+            "certificate_hash": "cf3443d2b7273b3a5de5d9c8facd0d807dffa74b"
+          }
+        },
+        {
+          "client_id": "156931219287-hpepcn9icfricos1h0f729d1aj0pscan.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd5RnhxrkdGxgFCTrESuuPdu_uo22G6pQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "156931219287-hpepcn9icfricos1h0f729d1aj0pscan.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
