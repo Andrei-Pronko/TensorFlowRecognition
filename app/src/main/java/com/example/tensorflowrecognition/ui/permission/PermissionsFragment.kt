@@ -1,4 +1,4 @@
-package com.example.tensorflowrecognition.ui.main
+package com.example.tensorflowrecognition.ui.permission
 
 import android.Manifest
 import android.content.Context
@@ -11,8 +11,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import com.example.tensorflowrecognition.R
-
-private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
 
 class PermissionsFragment : Fragment() {
 
@@ -46,6 +44,8 @@ class PermissionsFragment : Fragment() {
     }
 
     companion object {
+
+        private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
 
         fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
             ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED

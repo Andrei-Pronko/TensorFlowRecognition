@@ -9,7 +9,7 @@
 
     <fragment
         android:id="@+id/permissions_fragment"
-        android:name="com.example.tensorflowrecognition.ui.main.PermissionsFragment"
+        android:name="com.example.tensorflowrecognition.ui.permission.PermissionsFragment"
         android:label="PermissionsFragment"
         >
 
@@ -27,7 +27,6 @@
         android:name="com.example.tensorflowrecognition.ui.main.MainFragment"
         android:label="CameraFragment"
         >
-
 
         <action
             android:id="@+id/action_main_to_permissions"
