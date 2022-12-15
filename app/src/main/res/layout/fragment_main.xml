@@ -13,7 +13,7 @@
         app:scaleType="fillStart"
         />
 
-    <com.example.tensorflowrecognition.ui.OverlayView
+    <com.example.tensorflowrecognition.ui.utils.OverlayView
         android:id="@+id/overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

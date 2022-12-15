@@ -10,26 +10,22 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.example.tensorflowrecognition.R
 import com.example.tensorflowrecognition.databinding.FragmentMainBinding
 import com.example.tensorflowrecognition.ui.permission.PermissionsFragment
 import com.example.tensorflowrecognition.ui.utils.ObjectDetectorHelper
-import com.example.tensorflowrecognition.ui.utils.ObjectDetectorState
 import com.google.firebase.ml.modeldownloader.CustomModelDownloadConditions
 import com.google.firebase.ml.modeldownloader.DownloadType
 import com.google.firebase.ml.modeldownloader.FirebaseModelDownloader
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
 import org.tensorflow.lite.task.gms.vision.detector.Detection
 import java.io.File
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class MainFragment : Fragment(R.layout.fragment_main) {
+class MainFragment : Fragment(R.layout.fragment_main), ObjectDetectorHelper.DetectorListener {
 
     companion object {
         private const val FIREBASE_MODEL_NAME = "object-detection"
@@ -59,33 +55,16 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     }
 
     private fun observeObjectDetector() {
-        objectDetectorHelper = ObjectDetectorHelper(requireContext(), viewLifecycleOwner.lifecycleScope)
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            objectDetectorHelper.objectDetectorState
-                .onEach { objectDetectorState ->
-                    when (objectDetectorState) {
-                        ObjectDetectorState.Initialized -> downloadFirebaseModel()
-                        is ObjectDetectorState.Error -> objectDetectorState.throwable.localizedMessage?.let(::onError)
-                        is ObjectDetectorState.Result -> onResults(
-                            objectDetectorState.results,
-                            objectDetectorState.imageWidth,
-                            objectDetectorState.imageHeight
-                        )
-                    }
-                }
-                .collect()
-        }
+        objectDetectorHelper = ObjectDetectorHelper(requireContext(), this)
+
     }
 
-    private fun downloadFirebaseModel() {
-        val conditions = CustomModelDownloadConditions.Builder().build()
-        FirebaseModelDownloader.getInstance()
-            .getModel(FIREBASE_MODEL_NAME, DownloadType.LOCAL_MODEL, conditions)
-            .addOnSuccessListener {
-                it.file?.let(::onInitialized)
-            }.addOnFailureListener {
-                it.localizedMessage?.let(::onError)
-            }
+    private fun initRecognition(customModelFile: File) {
+        objectDetectorHelper.setupObjectDetector(customModelFile)
+        cameraExecutor = Executors.newSingleThreadExecutor()
+        binding.viewFinder.post {
+            setUpCamera()
+        }
     }
 
     private fun setUpCamera() {
@@ -132,7 +111,6 @@ class MainFragment : Fragment(R.layout.fragment_main) {
                                 Bitmap.Config.ARGB_8888
                             )
                         }
-
                         detectObjects(image)
                     }
                 }
@@ -142,6 +120,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         try {
             camera = cameraProvider.bindToLifecycle(this, cameraSelector, preview, imageAnalyzer)
             preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+            binding.progressCircular.isVisible = false
         } catch (e: Exception) {
             e.localizedMessage?.let(::onError)
         }
@@ -150,9 +129,7 @@ class MainFragment : Fragment(R.layout.fragment_main) {
     private fun detectObjects(image: ImageProxy) {
         image.use { bitmapBuffer.copyPixelsFromBuffer(image.planes[0].buffer) }
         val imageRotation = image.imageInfo.rotationDegrees
-        objectDetectorHelper.detect(bitmapBuffer, imageRotation) {
-            onResults(it.results, bitmapBuffer.width, bitmapBuffer.height)
-        }
+        objectDetectorHelper.detect(bitmapBuffer, imageRotation)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -160,21 +137,23 @@ class MainFragment : Fragment(R.layout.fragment_main) {
         imageAnalyzer?.targetRotation = binding.viewFinder.display.rotation
     }
 
-    private fun onInitialized(customModelFile: File) {
-        objectDetectorHelper.setupObjectDetector(customModelFile)
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        binding.viewFinder.post {
-            setUpCamera()
-        }
-        binding.progressCircular.isVisible = false
+    override fun onInitialized() {
+        val conditions = CustomModelDownloadConditions.Builder().build()
+        FirebaseModelDownloader.getInstance()
+            .getModel(FIREBASE_MODEL_NAME, DownloadType.LOCAL_MODEL, conditions)
+            .addOnSuccessListener {
+                it.file?.let(::initRecognition)
+            }.addOnFailureListener {
+                onError(it.message.toString())
+            }
     }
 
-    private fun onError(error: String) {
+    override fun onError(error: String) {
         Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         binding.progressCircular.isVisible = false
     }
 
-    private fun onResults(
+    override fun onResults(
         results: MutableList<Detection>?,
         imageHeight: Int,
         imageWidth: Int
